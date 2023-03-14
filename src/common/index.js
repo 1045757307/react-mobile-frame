@@ -1,4 +1,4 @@
 import axios from './utils/request';
-import './index.less';
+import './index.sass';
 
 export default axios;

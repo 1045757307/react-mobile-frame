@@ -38,16 +38,13 @@ class HttpRequest {
     if (token) newOptions.headers.Authorization = token;
     const { extra, url } = newOptions;
     const instance = axios.create();
-    instance.interceptors.request.use(
-      this.beforeRequest(extra, url),
-      (error) => {
-        this.release(extra, url);
-        return Promise.reject(error);
-      }
-    );
+    instance.interceptors.request.use(this.beforeRequest(extra, url), error => {
+      this.release(extra, url);
+      return Promise.reject(error);
+    });
     instance.interceptors.response.use(
       this.succRequest(extra, url),
-      this.failRequest(extra, url)
+      this.failRequest(extra, url),
     );
     delete newOptions.extra; // 移除不必要参数
     return instance(newOptions);
@@ -57,7 +54,7 @@ class HttpRequest {
    * @param options
    */
   beforeRequest(extra, url) {
-    return (config) => {
+    return config => {
       // loading控制 不建议开启 请自行控制
       if (
         !Object.keys(this.queue).length &&
@@ -85,7 +82,7 @@ class HttpRequest {
    * @param extra
    */
   succRequest(extra, url) {
-    return (res) => {
+    return res => {
       const { isReturnFull, isErrorHandle } = extra;
       this.release(extra, url);
       const { data: resData, status } = res;
@@ -123,7 +120,7 @@ class HttpRequest {
    * @param extra
    */
   failRequest(extra, url) {
-    return (error) => {
+    return error => {
       if (error.response) {
         const {
           response: { status, statusText, data },
@@ -224,7 +221,7 @@ class HttpRequest {
   handleFormDataParams(data) {
     const formData = new FormData();
     if (data) {
-      Object.keys(data).forEach((key) => {
+      Object.keys(data).forEach(key => {
         formData.append(key, data[key]);
       });
     }
@@ -238,7 +235,7 @@ class HttpRequest {
   handleParams(data) {
     const ret = [];
     if (data) {
-      Object.keys(data).forEach((key) => {
+      Object.keys(data).forEach(key => {
         let paramVal = data[key];
         if (paramVal === 0 || paramVal === '' || paramVal) {
           if (typeof paramVal === 'string') paramVal = trim(paramVal);
@@ -246,7 +243,7 @@ class HttpRequest {
             paramVal = JSON.stringify(paramVal);
           }
           ret.push(
-            `${encodeURIComponent(key)}=${encodeURIComponent(paramVal)}`
+            `${encodeURIComponent(key)}=${encodeURIComponent(paramVal)}`,
           );
         }
       });

@@ -1,18 +1,19 @@
-import Home from '../pages/Home';
-import Login from '../pages/Login';
+import { lazy } from 'react';
+// import { Navigate } from 'react-router-dom';
 
 const routes = [
   {
     path: '/login',
-    element: <Login />,
+    element: lazy(() => import('../pages/Login')),
   },
   {
     path: '/home',
-    element: <Home />,
+    element: lazy(() => import('../pages/Home')),
   },
   {
     path: '/',
-    to: '/home', // 重定向,
+    to: '/home',
+    // element: <Navigate to="/home" />, // 重定向,
   },
 ];
 

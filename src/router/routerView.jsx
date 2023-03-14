@@ -1,14 +1,26 @@
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+// useRoutes
+import routes from './routerConfig';
 
-function RouterView({ routes }) {
+function RouterView() {
   const routerArr = routes && routes.filter(item => !item.to); //非重定向的数组
   const redirectArr = routes && routes.filter(item => item.to); //重定向的数组
+  // const element = useRoutes(routes);
 
   return (
     <Routes>
       {routerArr &&
         routerArr.map((item, index) => (
-          <Route key={index} path={item.path} element={item.element} />
+          <Route
+            key={index}
+            path={item.path}
+            element={
+              <Suspense fallback={<div>loading....</div>}>
+                <item.element />
+              </Suspense>
+            }
+          />
         ))}
       {redirectArr &&
         redirectArr.map((item, index) => (
@@ -19,6 +31,7 @@ function RouterView({ routes }) {
           />
         ))}
     </Routes>
+    // <>{element}</>
   );
 }
 

@@ -1,4 +1,10 @@
-import axios from './utils/request';
-import './index.sass';
+// import axios from './utils/request';
+import Loading from './components/Loading';
+import NoFound from './components/NoFound';
+import './index.scss';
 
-export default axios;
+// 暴露公共组件
+export { Loading, NoFound };
+
+// 默认暴露axios
+// export default axios;

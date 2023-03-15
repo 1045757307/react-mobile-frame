@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { ConfigProvider } from 'antd-mobile';
 import enUS from 'antd-mobile/es/locales/en-US';
 // import zhCN from 'antd-mobile/es/locales/zh-CN';
-import './index.css';
+import './index.scss';
 import App from './router/index.jsx';
 import reportWebVitals from './reportWebVitals';
 

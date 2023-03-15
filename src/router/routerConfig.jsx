@@ -4,16 +4,20 @@ import { lazy } from 'react';
 const routes = [
   {
     path: '/login',
-    element: lazy(() => import('../pages/Login')),
+    element: lazy(() => import('@pages/Login')),
   },
   {
     path: '/home',
-    element: lazy(() => import('../pages/Home')),
+    element: lazy(() => import('@pages/Home')),
   },
   {
     path: '/',
     to: '/home',
     // element: <Navigate to="/home" />, // 重定向,
+  },
+  {
+    path: '*',
+    element: lazy(() => import('@common/components/NoFound')),
   },
 ];
 

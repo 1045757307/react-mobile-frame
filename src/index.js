@@ -1,5 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { ConfigProvider } from 'antd-mobile';
+import enUS from 'antd-mobile/es/locales/en-US';
+// import zhCN from 'antd-mobile/es/locales/zh-CN';
 import './index.css';
 import App from './router/index.jsx';
 import reportWebVitals from './reportWebVitals';
@@ -7,7 +10,9 @@ import reportWebVitals from './reportWebVitals';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <ConfigProvider locale={enUS}>
+      <App />
+    </ConfigProvider>
   </React.StrictMode>,
 );
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { Toast } from 'antd-mobile';
-import { getLanguage, getCookie, setCookie } from './util';
+import { Toast, Dialog } from 'antd-mobile';
+import { getLanguage, getCookie } from '@common';
 
 class HttpRequest {
   constructor(baseUrl) {
@@ -23,9 +23,11 @@ class HttpRequest {
       url: '',
       // 跨域请求，允许保存cookie
       withCredentials: true,
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8',
-      },
+      // 默认
+      // headers: {
+      //   'Content-Type': 'application/json;charset=UTF-8',
+      // },
+      timeout: 20000,
       cancelToken: source.token,
       extra: {
         isReturnFull: false, // 请求成功的时候是否需要把请求结果全部返回 默认只返回Data数据
@@ -62,15 +64,9 @@ class HttpRequest {
   startRequest(options) {
     // 合并参数
     const newOptions = Object.assign({}, this.getDefaultConfig(), options);
-    const token = getCookie('token');
-    const userInfo = getCookie('userInfo');
-    if (token) newOptions.headers.Authorization = token;
-    if (userInfo && userInfo.elsAccount && userInfo.elsSubAccount) {
-      newOptions.headers.account = `${userInfo.elsAccount}_${userInfo.elsSubAccount}`;
-    }
     const { extra, url } = newOptions;
     const instance = axios.create();
-    instance.interceptors.request.use(this.beforeRequest(extra, url), error => {
+    instance.interceptors.request.use(this.beforeRequest(url), error => {
       this.release(url);
       return Promise.reject(error);
     });
@@ -85,17 +81,30 @@ class HttpRequest {
    * 请求拦截处理
    * @param options
    */
-  beforeRequest(extra, url) {
+  beforeRequest(url) {
     return config => {
+      if (Object.keys(this.queue).length > 0) {
+        console.log('存在未完成的请求', Object.keys(this.queue).length);
+      }
       // 加入请求队列
       this.queue[url] = true;
-      if (
-        config.method === 'get' &&
-        config.headers['Content-Type'] === 'application/x-www-form-urlencoded'
-      ) {
-        // 处理国际化
-        const lang = getLanguage();
+
+      // 设置token和account
+      const token = getCookie('token');
+      if (token) config.headers.token = token;
+      const userInfo = getCookie('userInfo');
+      if (userInfo && userInfo.elsAccount && userInfo.elsSubAccount) {
+        config.headers.account = `${userInfo.elsAccount}_${userInfo.elsSubAccount}`;
+      }
+
+      // 处理国际化
+      const lang = getLanguage();
+      if (config.method === 'get') {
         config.params = Object.assign(Object.assign({}, config.data), {
+          local: lang,
+        });
+      } else {
+        config.data = Object.assign(Object.assign({}, config.data), {
           local: lang,
         });
       }
@@ -108,40 +117,53 @@ class HttpRequest {
    */
   succRequest(extra, url) {
     return res => {
+      console.log('request success');
       const { isReturnFull, isErrorHandle } = extra;
       this.release(url);
-      const { data: resData, status } = res;
-      const { success, message, data } = resData;
-      const currentToken = res.headers.authorization;
-      if (currentToken) setCookie('token', currentToken);
-      switch (status) {
-        case 200:
-          if (isReturnFull) return resData;
-          if (success) return data;
-          if (isErrorHandle) return Promise.reject(resData);
-          // 错误自行处理
-          else {
+      const { message, data, code } = res.data;
+      if (res.status === 200) {
+        if (isReturnFull) return res.data;
+        if (isErrorHandle) return Promise.reject(res.data); // 错误自行处理
+        switch (code) {
+          case '200':
+            return data;
+          case '401':
+            Dialog.confirm({
+              content: message,
+              onConfirm: () => {
+                if (!window.location.pathname.startsWith('/login')) {
+                  window.location.href = `/login?redirect=${window.location.href}`;
+                }
+              },
+            });
+            return Promise.reject();
+          case '-101':
+            Dialog.confirm({
+              content: `${message}立即登录？`,
+              onConfirm: () => {
+                if (!window.location.pathname.startsWith('/login')) {
+                  window.location.href = `/login?redirect=${window.location.href}`;
+                }
+              },
+            });
+            return Promise.reject();
+          default:
             // 错误程序自动处理
             Toast.show({
               icon: 'fail',
               content: message,
             });
-            return Promise.reject(resData);
-          }
-        case 401:
-          // 登录失效 跳转登录页
-          return Promise.reject();
-        case 404:
-          return Promise.reject();
-        default:
-          if (isErrorHandle) {
-            return Promise.reject(resData);
-          }
-          Toast.show({
-            icon: 'fail',
-            content: message || '请求失败！',
-          });
-          return Promise.reject();
+            return Promise.reject(res.data);
+        }
+      } else {
+        if (isErrorHandle) {
+          return Promise.reject(res.data);
+        }
+        Toast.show({
+          icon: 'fail',
+          content: message || '请求失败！',
+        });
+        return Promise.reject();
       }
     };
   }
@@ -150,31 +172,28 @@ class HttpRequest {
    * @param extra
    */
   failRequest(extra, url) {
+    console.log('request file');
     return error => {
       if (error.response) {
         const {
           response: { status, statusText, data },
         } = error;
-        this.release(url);
         const message = (data && (data.message || statusText)) || statusText;
-        switch (status) {
-          case 401:
-            // 登录失效 跳转登录页
-            console.log('失败请求处理');
-            return Promise.reject();
-          default:
-            if (extra.isErrorHandle) {
-              return Promise.reject({
-                success: false,
-                message: `${status}: ${message || '请求失败！'}`,
-              });
-            }
-            Toast.show({
-              icon: 'fail',
-              content: `${status}: ${message || '请求失败！'}`,
-            });
-            return Promise.reject();
+        this.release(url);
+        if (status === 404) {
+          return Promise.reject();
         }
+        if (extra.isErrorHandle) {
+          return Promise.reject({
+            success: false,
+            message: `${status}: ${message || '请求失败！'}`,
+          });
+        }
+        Toast.show({
+          icon: 'fail',
+          content: `${status}: ${message || '请求失败！'}`,
+        });
+        return Promise.reject();
       } else {
         // 取消请求
         this.release(url);

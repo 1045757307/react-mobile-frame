@@ -1,9 +1,10 @@
 import { Input, Button } from 'antd-mobile';
 import { srmLogin } from '@api/user';
+
 const Login = () => {
   // 点击登录
   const handleLogin = () => {
-    srmLogin({}).then(res => {
+    srmLogin({ a: '1' }).then(res => {
       console.log(res);
     });
   };

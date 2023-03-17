@@ -1,4 +1,4 @@
-// import axios from './utils/request';
+import axios from './utils/request';
 import Loading from './components/Loading';
 import NoFound from './components/NoFound';
 import './index.scss';
@@ -7,4 +7,4 @@ import './index.scss';
 export { Loading, NoFound };
 
 // 默认暴露axios
-// export default axios;
+export default axios;

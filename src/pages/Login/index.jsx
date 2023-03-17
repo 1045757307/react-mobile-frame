@@ -1,10 +1,17 @@
 import { Input, Button } from 'antd-mobile';
-
+import { srmLogin } from '@api/user';
 const Login = () => {
+  // 点击登录
+  const handleLogin = () => {
+    srmLogin({}).then(res => {
+      console.log(res);
+    });
+  };
+
   return (
     <div>
       <Input />
-      <Button block color="primary">
+      <Button block color="primary" onClick={handleLogin}>
         登录
       </Button>
     </div>

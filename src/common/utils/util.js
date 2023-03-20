@@ -25,7 +25,9 @@ export const withAdvanced = Component => {
  * 获取当前选中的语言
  */
 export function getLanguage() {
-  const localSearch = baseUrlToJson(window.location.search.split('?')[1]).local;
+  const localSearch = window.location.search.split('?')[1]
+    ? baseUrlToJson(window.location.search.split('?')[1]).local
+    : undefined;
   const langCookie = getCookie('lang');
   const language = localSearch ? localSearch : langCookie ? langCookie : 'cn';
   return language;

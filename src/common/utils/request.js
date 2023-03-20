@@ -92,7 +92,8 @@ class HttpRequest {
       // 设置token和account
       const token = getCookie('token');
       if (token) config.headers.token = token;
-      const userInfo = getCookie('userInfo');
+      let userInfo = getCookie('userInfo');
+      userInfo = userInfo ? JSON.parse(userInfo) : userInfo;
       if (userInfo && userInfo.elsAccount && userInfo.elsSubAccount) {
         config.headers.account = `${userInfo.elsAccount}_${userInfo.elsSubAccount}`;
       }
@@ -172,7 +173,7 @@ class HttpRequest {
    * @param extra
    */
   failRequest(extra, url) {
-    console.log('request file');
+    console.log('request fail');
     return error => {
       if (error.response) {
         const {

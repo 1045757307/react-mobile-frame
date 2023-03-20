@@ -2,16 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConfigProvider } from 'antd-mobile';
 import enUS from 'antd-mobile/es/locales/en-US';
-// import zhCN from 'antd-mobile/es/locales/zh-CN';
+import zhCN from 'antd-mobile/es/locales/zh-CN';
 import './index.scss';
-import App from './router/index.jsx';
+import RootRouter from './router/index.jsx';
 import reportWebVitals from './reportWebVitals';
+import { getLanguage } from '@common';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <ConfigProvider locale={enUS}>
-      <App />
+    <ConfigProvider locale={getLanguage() === 'en' ? enUS : zhCN}>
+      <RootRouter />
     </ConfigProvider>
   </React.StrictMode>,
 );

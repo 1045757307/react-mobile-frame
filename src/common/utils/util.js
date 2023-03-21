@@ -38,9 +38,9 @@ export function getLanguage() {
  * @param {*} url url的search或hash，不包含#、?
  */
 export function baseUrlToJson(url) {
-  var newObj = new Object();
-  var strs = url.split('&');
-  for (var i = 0; i < strs.length; i++) {
+  const newObj = {};
+  const strs = url.split('&');
+  for (let i = 0; i < strs.length; i++) {
     const arr = strs[i].split('=');
     newObj[arr[0]] = arr[1] === 'undefined' ? undefined : arr[1];
   }

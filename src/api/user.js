@@ -1,9 +1,9 @@
 import axios from '@common';
 
 // 验证token
-export const getUserInfoByToken = token =>
+export const getUserInfoByToken = () =>
   axios.request({
-    url: `ElsAuthService/webValidToken/${token}`,
+    url: ``,
     method: 'get',
     headers: {
       'Content-type': 'application/text',
@@ -13,9 +13,9 @@ export const getUserInfoByToken = token =>
     },
   });
 
-// srm登录
-export const srmLogin = data =>
+// 用户名密码登录
+export const login = data =>
   axios.request({
-    url: `SingleSignOnService/srmLogin`,
+    url: ``,
     data,
   });
